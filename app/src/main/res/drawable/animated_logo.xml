@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/iplocator_logo">
+
+    <target
+        android:animation="@animator/outer_logo_animator"
+        android:name="outerLogo"/>
+
+    <target
+        android:animation="@animator/inner_logo_animator"
+        android:name="innerLogo"/>
+
+</animated-vector>
