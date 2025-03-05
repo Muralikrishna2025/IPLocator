@@ -1,18 +1,12 @@
 package uk.ac.tees.mad.iplocator.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -33,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,34 +35,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import uk.ac.tees.mad.iplocator.navigation.HomeScreen
+import androidx.navigation.NavHostController
+import uk.ac.tees.mad.iplocator.navigation.SubGraph
 
 @Composable
-fun AuthScreen(navController: NavHostController) {
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+fun SignUpScreen(navController: NavHostController) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+
+    ) { innerPadding ->
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var isPasswordVisible by remember { mutableStateOf(false) }
-        var isLoginMode by remember { mutableStateOf(true) }
+        var isSignUpMode by remember { mutableStateOf(true) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
         Box(
             modifier = Modifier
-                .fillMaxSize().padding(innerPadding)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialTheme.colorScheme.background
-                        )
-                    )
-                ).verticalScroll(rememberScrollState()),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center
         ) {
             Card(
                 modifier = Modifier
@@ -91,20 +82,19 @@ fun AuthScreen(navController: NavHostController) {
                     )
 
                     Text(
-                        text = if (isLoginMode) "Login" else "Sign Up",
+                        text = "Sign Up",
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = if (isLoginMode) "Please sign in to continue." else "Create an account to get started.",
+                        text = "Create an account to get started.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
 
-                    OutlinedTextField(
-                        value = email,
+                    OutlinedTextField(value = email,
                         onValueChange = { email = it },
                         label = { Text("Email") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -112,8 +102,7 @@ fun AuthScreen(navController: NavHostController) {
                         shape = RoundedCornerShape(8.dp)
                     )
 
-                    OutlinedTextField(
-                        value = password,
+                    OutlinedTextField(value = password,
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -127,8 +116,7 @@ fun AuthScreen(navController: NavHostController) {
                                     contentDescription = "Toggle Password Visibility"
                                 )
                             }
-                        }
-                    )
+                        })
 
                     AnimatedVisibility(visible = errorMessage != null) {
                         errorMessage?.let {
@@ -144,19 +132,17 @@ fun AuthScreen(navController: NavHostController) {
 
                     Button(
                         onClick = {
-                            // Placeholder for login/signup logic
-                            println("${if (isLoginMode) "Login" else "Sign Up"} button clicked with email: $email, password: $password")
-                            if (isLoginMode) {
-                                //onLoginSuccess()
-                                navController.navigate(HomeScreen)
-                            } else {
-                                // Handle signup logic here
+                            // Placeholder for signup logic
+                            println("Sign Up button clicked with email: $email, password: $password")
+                            //onSignUpSuccess()
+                            navController.navigate(SubGraph.AuthGraph) {
+                                popUpTo(SubGraph.AuthGraph) {
+                                    inclusive = true
+                                }
                             }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
+                        }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(if (isLoginMode) "Login" else "Sign Up")
+                        Text("Sign Up")
                     }
 
                     Row(
@@ -165,15 +151,20 @@ fun AuthScreen(navController: NavHostController) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (isLoginMode) "Don't have an account?" else "Already have an account?",
+                            text = "Already have an account?",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         TextButton(onClick = {
-                            isLoginMode = !isLoginMode
+                            isSignUpMode = !isSignUpMode
                             errorMessage = null
+                            navController.navigate(SubGraph.AuthGraph) {
+                                popUpTo(SubGraph.AuthGraph) {
+                                    inclusive = true
+                                }
+                            }
                         }) {
-                            Text(if (isLoginMode) "Sign Up" else "Login")
+                            Text("Login")
                         }
                     }
                 }

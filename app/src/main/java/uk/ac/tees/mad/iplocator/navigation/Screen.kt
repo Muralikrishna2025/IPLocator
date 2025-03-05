@@ -2,20 +2,33 @@ package uk.ac.tees.mad.iplocator.navigation
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-object SplashScreen
+sealed class SubGraph{
+    @Serializable
+    data object AuthGraph: SubGraph()
+    @Serializable
+    data object HomeGraph: SubGraph()
+}
 
-@Serializable
-object AuthScreen
+sealed class Dest{
+    @Serializable
+    data object SplashScreen: Dest()
 
-@Serializable
-object HomeScreen
+    @Serializable
+    data object LoginScreen: Dest()
 
-@Serializable
-object SearchScreen
+    @Serializable
+    data object SignUpScreen: Dest()
 
-@Serializable
-object MapScreen
+    @Serializable
+    data object HomeScreen: Dest()
 
-@Serializable
-object ProfileScreen
+    @Serializable
+    data object SearchScreen: Dest()
+
+    @Serializable
+    data object MapScreen: Dest()
+
+    @Serializable
+    data object ProfileScreen: Dest()
+
+}

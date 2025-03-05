@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "486554791807",
+    "project_id": "iplocator-db2f6",
+    "storage_bucket": "iplocator-db2f6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:486554791807:android:4ed35bff4368ec5500744a",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.iplocator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvfxNSiYypwtcqELMuwuNVaBiFhrSCBxc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,40 +1,64 @@
 package uk.ac.tees.mad.iplocator.ui.screens
 
-import android.os.Handler
-import android.os.Looper
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.delay
-import uk.ac.tees.mad.iplocator.navigation.AuthScreen
+import org.koin.androidx.compose.koinViewModel
+import uk.ac.tees.mad.iplocator.model.dataclass.LoadingState
+import uk.ac.tees.mad.iplocator.navigation.Dest
+import uk.ac.tees.mad.iplocator.navigation.SubGraph
+import uk.ac.tees.mad.iplocator.ui.utils.LoadingErrorScreen
 import uk.ac.tees.mad.iplocator.ui.utils.LoadingScreen
+import uk.ac.tees.mad.iplocator.viewmodel.SplashScreenViewModel
 
 @Composable
-fun SplashScreen(navController: NavHostController) {
+fun SplashScreen(
+    navController: NavHostController, viewModel: SplashScreenViewModel = koinViewModel()
+) {
+    val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        LaunchedEffect(key1 = true) {
-            delay(3000)
-            navController.navigate(AuthScreen)
-        }
         Box(
             modifier = Modifier
-                .fillMaxSize().padding(innerPadding),
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
         ) {
-            // TODO: Add your custom loading screen content here
-            LoadingScreen()
-            // TODO: ADD error screen if something goes wrong
-//            LoadingErrorScreen(
-//                errorMessage = errorMessage,
-//                // retry function in viewmodel is called in `onRetry` to retry loading.
-//                onRetry = { TODO() }
-//            )
+            Crossfade(
+                targetState = loadingState,
+                animationSpec = tween(durationMillis = 1000),
+                label = "splashScreen"
+            ) { state ->
+                when (state) {
+                    is LoadingState.Loading -> {
+                        LoadingScreen()
+                    }
+
+                    is LoadingState.Error -> {
+                        LoadingErrorScreen(errorMessage = state.message,
+                            onRetry = { viewModel.startLoading() })
+                    }
+
+                    is LoadingState.Success -> {
+                        LaunchedEffect(key1 = Unit) {
+                            navController.navigate(SubGraph.AuthGraph) {
+                                popUpTo(Dest.SplashScreen) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
