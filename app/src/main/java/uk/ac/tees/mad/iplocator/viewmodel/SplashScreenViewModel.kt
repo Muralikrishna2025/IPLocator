@@ -2,6 +2,7 @@ package uk.ac.tees.mad.iplocator.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,9 +10,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.iplocator.model.dataclass.LoadingState
+import uk.ac.tees.mad.iplocator.model.repository.AuthRepository
 import uk.ac.tees.mad.iplocator.model.repository.NetworkRepository
 
-class SplashScreenViewModel(private val networkRepository: NetworkRepository) : ViewModel() {
+class SplashScreenViewModel(private val networkRepository: NetworkRepository, private val authRepository: AuthRepository) : ViewModel() {
 
     private val _loadingState = MutableStateFlow<LoadingState<Any>>(LoadingState.Loading)
     val loadingState: StateFlow<LoadingState<Any>> = _loadingState
@@ -32,6 +34,10 @@ class SplashScreenViewModel(private val networkRepository: NetworkRepository) : 
 
     init {
         startLoading()
+    }
+
+    fun isLoggedIn(): Boolean{
+       return authRepository.isLoggedIn()
     }
 
     fun startLoading() {
