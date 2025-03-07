@@ -54,6 +54,8 @@ dependencies {
     // Retrofit
     implementation (libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 
     // Koin
     implementation(libs.koin.core)
@@ -78,6 +80,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.analytics)
     implementation(libs.firebase.auth)
+
+    implementation ("com.github.chintan369:Ipify-Android:1.0.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

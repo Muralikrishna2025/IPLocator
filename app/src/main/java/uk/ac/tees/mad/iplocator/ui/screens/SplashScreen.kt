@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.iplocator.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -41,7 +42,8 @@ fun SplashScreen(
             ) { state ->
                 when (state) {
                     is LoadingState.Loading -> {
-                        LoadingScreen()
+                        AnimatedVisibility(state==LoadingState.Loading) {
+                        LoadingScreen()}
                     }
 
                     is LoadingState.Error -> {

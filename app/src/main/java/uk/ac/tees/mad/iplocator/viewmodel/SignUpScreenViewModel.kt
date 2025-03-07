@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ import kotlin.Unit
 
 class SignUpScreenViewModel(private val authRepository: AuthRepository) : ViewModel(){
     private val _signUpResult = MutableStateFlow<AuthResult<Boolean>>(AuthResult.Success(false))
-    val signUpResult: StateFlow<AuthResult<Boolean>> = _signUpResult
+    val signUpResult: StateFlow<AuthResult<Boolean>> = _signUpResult.asStateFlow()
 
 
 

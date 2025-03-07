@@ -115,7 +115,8 @@ fun LoginScreen(
                                 label = { Text("Email") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(8.dp)
+                                shape = RoundedCornerShape(8.dp),
+                                singleLine = true
                             )
 
                             OutlinedTextField(value = password,
@@ -125,6 +126,7 @@ fun LoginScreen(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp),
+                                singleLine = true,
                                 trailingIcon = {
                                     IconButton(onClick = {
                                         isPasswordVisible = !isPasswordVisible
