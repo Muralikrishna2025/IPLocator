@@ -49,8 +49,7 @@ import uk.ac.tees.mad.iplocator.viewmodel.HomeScreenViewModel
 fun HomeScreen(
     navController: NavHostController, viewmodel: HomeScreenViewModel = koinViewModel()
 ) {
-    val deviceIp = null
-    //by viewmodel.deviceIp.collectAsStateWithLifecycle()
+    val deviceIp by viewmodel.deviceIp.collectAsStateWithLifecycle()
     val ipLocationDetails by viewmodel.ipLocation.collectAsStateWithLifecycle()
     val language = Language(
         code = "en", name = "English", native = "English"
@@ -96,7 +95,7 @@ fun HomeScreen(
 //    )
 
     var ipLocation = IpLocation(
-        ip = "134.201.250.155",
+        ip = deviceIp,
         type = "ipv4",
         continentCode = "NA",
         continentName = "North America",
@@ -121,39 +120,39 @@ fun HomeScreen(
 
     )
 
-    if (deviceIp != null) {
-        if(ipLocationDetails==null){
-        viewmodel.getIpLocationDetails(deviceIp!!)}
-        if (ipLocationDetails != null) {
-            ipLocation = ipLocationDetails!!
-        }
-    } else {
-        ipLocation = IpLocation(
-            ip = "134.201.250.155",
-            type = "ipv4",
-            continentCode = "NA",
-            continentName = "North America",
-            countryCode = "US",
-            countryName = "United States",
-            regionCode = "CA",
-            regionName = "California",
-            city = "Los Angeles",
-            zip = "90013",
-            latitude = 34.0655,
-            longitude = -118.2405,
-            msa = "31100",
-            dma = "803",
-            radius = null,
-            ipRoutingType = null,
-            connectionType = null,
-            location = location,
-
-//        timeZone = timeZone,
-//        currency = currency,
-//        connection = connection
-
-        )
-    }
+//    if (deviceIp != null) {
+//        if(ipLocationDetails==null){
+//        viewmodel.getIpLocationDetails(deviceIp!!)}
+//        if (ipLocationDetails != null) {
+//            ipLocation = ipLocationDetails!!
+//        }
+//    } else {
+//        ipLocation = IpLocation(
+//            ip = "134.201.250.155",
+//            type = "ipv4",
+//            continentCode = "NA",
+//            continentName = "North America",
+//            countryCode = "US",
+//            countryName = "United States",
+//            regionCode = "CA",
+//            regionName = "California",
+//            city = "Los Angeles",
+//            zip = "90013",
+//            latitude = 34.0655,
+//            longitude = -118.2405,
+//            msa = "31100",
+//            dma = "803",
+//            radius = null,
+//            ipRoutingType = "fixed",
+//            connectionType = "ipv4",
+//            location = location,
+//
+////        timeZone = timeZone,
+////        currency = currency,
+////        connection = connection
+//
+//        )
+//    }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     Scaffold(
