@@ -6,8 +6,6 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import com.creative.ipfyandroid.Ipfy
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -17,7 +15,7 @@ import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.SocketException
 
-class NetworkConnectivityManager (private val context: Context){
+class NetworkConnectivityManager(private val context: Context) {
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -34,16 +32,16 @@ class NetworkConnectivityManager (private val context: Context){
             }
         }
 
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
+        val request =
+            NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build()
         connectivityManager.registerNetworkCallback(request, networkCallback)
 
         // Check initial state
         val isCurrentlyConnected = connectivityManager.activeNetwork?.let {
             val capabilities = connectivityManager.getNetworkCapabilities(it)
             capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        } ?: false
+        } == true
         launch { send(isCurrentlyConnected) }
 
         awaitClose {
@@ -51,6 +49,7 @@ class NetworkConnectivityManager (private val context: Context){
         }
     }.distinctUntilChanged()
 
+    // Gives the device's Local IP address which we don't need
     fun getDeviceIpAddress(): String? {
         try {
             val interfaces = NetworkInterface.getNetworkInterfaces()

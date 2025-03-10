@@ -1,7 +1,6 @@
 package uk.ac.tees.mad.iplocator.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,7 +36,8 @@ fun SearchScreen(navController: NavHostController) {
         DockedSearchBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(innerPadding).padding(16.dp),
+                .padding(innerPadding)
+                .padding(16.dp),
             inputField = {
                 SearchBarDefaults.InputField(modifier = Modifier.fillMaxWidth(),
                     query = query,
@@ -59,7 +59,7 @@ fun SearchScreen(navController: NavHostController) {
                         )
                     },
                     trailingIcon = {
-                        if(expanded){
+                        if (expanded) {
                             IconButton(onClick = {
                                 if (query.isNotBlank()) {
                                     query = ""
@@ -70,7 +70,8 @@ fun SearchScreen(navController: NavHostController) {
 
                             }) {
                                 Icon(Icons.Default.Close, contentDescription = null)
-                            }}
+                            }
+                        }
 
                     })
             },

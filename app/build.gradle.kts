@@ -76,12 +76,15 @@ dependencies {
     // Compose Material Icons Extended
     implementation(libs.androidx.material.icons.extended)
 
+    // Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.svg)
+
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.analytics)
     implementation(libs.firebase.auth)
-
-    implementation ("com.github.chintan369:Ipify-Android:1.0.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

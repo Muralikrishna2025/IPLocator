@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -29,9 +28,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun LoadingErrorScreen(
-    errorMessage: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    errorMessage: String, onRetry: () -> Unit, modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier

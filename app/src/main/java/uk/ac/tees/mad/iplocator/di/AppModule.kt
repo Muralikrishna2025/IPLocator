@@ -19,6 +19,7 @@ import uk.ac.tees.mad.iplocator.viewmodel.SignUpScreenViewModel
 import uk.ac.tees.mad.iplocator.viewmodel.SplashScreenViewModel
 
 val appModule = module {
+
     single { NetworkConnectivityManager(androidContext()) }
     single { NetworkRepository(get()) }
 
@@ -31,7 +32,7 @@ val appModule = module {
 
     // Repository
     single { IpstackRepository(get()) }
-    single{ IpApiRepository(get()) }
+    single { IpApiRepository(get()) }
 
     // ViewModels
     viewModelOf(::SplashScreenViewModel)

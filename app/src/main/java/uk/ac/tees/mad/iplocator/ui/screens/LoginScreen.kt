@@ -1,6 +1,5 @@
 package uk.ac.tees.mad.iplocator.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -40,6 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -55,15 +59,16 @@ import uk.ac.tees.mad.iplocator.viewmodel.LoginScreenViewModel
 
 @Composable
 fun LoginScreen(
-    navController: NavHostController,
-    viewModel: LoginScreenViewModel = koinViewModel()
+    navController: NavHostController, viewModel: LoginScreenViewModel = koinViewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isLoginMode by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     val logInResult by viewModel.logInResult.collectAsStateWithLifecycle()
+    val focusManager = LocalFocusManager.current
+    val focusRequesterEmail = remember { FocusRequester() }
+    val focusRequesterPassword = remember { FocusRequester() }
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
@@ -109,12 +114,14 @@ fun LoginScreen(
                                 textAlign = TextAlign.Center
                             )
 
-                            OutlinedTextField(
-                                value = email,
+                            OutlinedTextField(value = email,
+                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterEmail),
                                 onValueChange = { email = it },
                                 label = { Text("Email") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(onNext = {
+                                    focusRequesterPassword.requestFocus()
+                                }),
                                 shape = RoundedCornerShape(8.dp),
                                 singleLine = true
                             )
@@ -122,9 +129,12 @@ fun LoginScreen(
                             OutlinedTextField(value = password,
                                 onValueChange = { password = it },
                                 label = { Text("Password") },
+                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterPassword),
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(onDone = {
+                                    focusManager.clearFocus()
+                                }),
                                 shape = RoundedCornerShape(8.dp),
                                 singleLine = true,
                                 trailingIcon = {
@@ -166,7 +176,6 @@ fun LoginScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 TextButton(onClick = {
-                                    errorMessage = null
                                     navController.navigate(Dest.SignUpScreen)
                                 }) {
                                     Text("Sign Up")
@@ -180,16 +189,16 @@ fun LoginScreen(
             false -> {
                 when (val result = logInResult) {
                     is AuthResult.Loading -> {
-                        AlertDialog(
-                            onDismissRequest = {
-                                isLoginMode = !isLoginMode
-                            },
+                        AlertDialog(onDismissRequest = {
+                            isLoginMode = !isLoginMode
+                        },
                             icon = { Icon(Icons.Default.CloudUpload, contentDescription = null) },
                             title = { Text("Loading") },
                             text = {
                                 Column(modifier = Modifier.fillMaxWidth()) {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.size(48.dp)
+                                        modifier = Modifier
+                                            .size(48.dp)
                                             .align(Alignment.CenterHorizontally)
                                     )
                                 }
@@ -199,44 +208,41 @@ fun LoginScreen(
 
                     is AuthResult.Success -> {
                         // Handle successful sign-up
-                        AlertDialog(
-                            icon = { Icon(Icons.Default.CloudDone, contentDescription = null) },
-                            title = { Text("Log in Successful") },
-                            text = {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text("You have successfully Logged in.")
-                                }
-                            },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    navController.navigate(SubGraph.HomeGraph) {
-                                        popUpTo(SubGraph.AuthGraph) {
-                                            inclusive = true
-                                        }
-                                    }
-                                }) {
-                                    Text("Go to Home Screen")
-                                }
-                            },
-                            onDismissRequest = {
+                        AlertDialog(icon = {
+                            Icon(
+                                Icons.Default.CloudDone, contentDescription = null
+                            )
+                        }, title = { Text("Log in Successful") }, text = {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text("You have successfully Logged in.")
+                            }
+                        }, confirmButton = {
+                            TextButton(onClick = {
                                 navController.navigate(SubGraph.HomeGraph) {
                                     popUpTo(SubGraph.AuthGraph) {
                                         inclusive = true
                                     }
                                 }
+                            }) {
+                                Text("Go to Home Screen")
                             }
-                        )
+                        }, onDismissRequest = {
+                            navController.navigate(SubGraph.HomeGraph) {
+                                popUpTo(SubGraph.AuthGraph) {
+                                    inclusive = true
+                                }
+                            }
+                        })
 
                     }
 
                     is AuthResult.Error -> {
                         // Handle sign-up error
-                        AlertDialog(
-                            icon = { Icon(Icons.Default.Error, contentDescription = null) },
+                        AlertDialog(icon = { Icon(Icons.Default.Error, contentDescription = null) },
                             title = { Text("Error") },
                             text = {
                                 Column(
@@ -256,8 +262,7 @@ fun LoginScreen(
                             },
                             onDismissRequest = {
                                 isLoginMode = !isLoginMode
-                            }
-                        )
+                            })
                     }
                 }
             }

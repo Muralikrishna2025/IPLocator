@@ -13,10 +13,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,7 +46,7 @@ fun ProfileScreen(navController: NavHostController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("Dark Mode")
-                Switch(checked = isDarkMode, onCheckedChange = {isDarkMode = !isDarkMode })
+                Switch(checked = isDarkMode, onCheckedChange = { isDarkMode = !isDarkMode })
             }
 
             Spacer(modifier = Modifier.height(16.dp))

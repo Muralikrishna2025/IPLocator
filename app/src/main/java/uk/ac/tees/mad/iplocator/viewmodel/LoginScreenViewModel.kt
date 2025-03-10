@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.onEach
 import uk.ac.tees.mad.iplocator.model.dataclass.AuthResult
 import uk.ac.tees.mad.iplocator.model.repository.AuthRepository
 
-class LoginScreenViewModel(private val authRepository: AuthRepository) : ViewModel(){
+class LoginScreenViewModel(private val authRepository: AuthRepository) : ViewModel() {
     private val _logInResult = MutableStateFlow<AuthResult<Boolean>>(AuthResult.Success(false))
     val logInResult: StateFlow<AuthResult<Boolean>> = _logInResult.asStateFlow()
 

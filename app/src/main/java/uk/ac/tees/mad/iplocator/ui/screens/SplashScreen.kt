@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +41,9 @@ fun SplashScreen(
             ) { state ->
                 when (state) {
                     is LoadingState.Loading -> {
-                        AnimatedVisibility(state==LoadingState.Loading) {
-                        LoadingScreen()}
+                        AnimatedVisibility(state == LoadingState.Loading) {
+                            LoadingScreen()
+                        }
                     }
 
                     is LoadingState.Error -> {
@@ -53,15 +53,15 @@ fun SplashScreen(
 
                     is LoadingState.Success -> {
                         val isUserLoggedOut = true
-                            //viewModel.getAuthState()
+                        //viewModel.getAuthState()
                         LaunchedEffect(key1 = Unit) {
-                            if(isUserLoggedOut){
-                            navController.navigate(SubGraph.AuthGraph) {
-                                popUpTo(Dest.SplashScreen) {
-                                    inclusive = true
+                            if (isUserLoggedOut) {
+                                navController.navigate(SubGraph.AuthGraph) {
+                                    popUpTo(Dest.SplashScreen) {
+                                        inclusive = true
+                                    }
                                 }
-                            }
-                            } else{
+                            } else {
                                 navController.navigate(SubGraph.HomeGraph) {
                                     popUpTo(Dest.SplashScreen) {
                                         inclusive = true

@@ -1,13 +1,11 @@
 package uk.ac.tees.mad.iplocator.model.retrofit
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uk.ac.tees.mad.iplocator.model.serviceapi.ipApiService
-import uk.ac.tees.mad.iplocator.model.serviceapi.ipstackApiService
 
 object IpApiRetrofitInstance {
     const val BASE_URL = "https://api.ipify.org"

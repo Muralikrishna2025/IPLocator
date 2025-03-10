@@ -35,14 +35,12 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             // Animated loading indicator
             AnimatedLoadingIndicator(
-                modifier = Modifier.size(100.dp),
-                color = MaterialTheme.colorScheme.primary
+                modifier = Modifier.size(100.dp), color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(16.dp))
             // Loading message
@@ -65,8 +63,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
  */
 @Composable
 fun AnimatedLoadingIndicator(
-    modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary
+    modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.primary
 ) {
     // Constants for animation and drawing
     val animationDuration = 1000 // Duration of one rotation in milliseconds
@@ -76,14 +73,12 @@ fun AnimatedLoadingIndicator(
     val infiniteTransition = rememberInfiniteTransition(label = "infinite transition")
     // Animate the rotation value from 0 to 360 degrees infinitely
     val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
+        initialValue = 0f, targetValue = 360f,
         // `infiniteRepeatable` is used to make the animation repeat infinitely.
         animationSpec = infiniteRepeatable(
             // `tween` is used to create a smooth animation.
             animation = tween(durationMillis = animationDuration)
-        ),
-        label = "rotation"
+        ), label = "rotation"
     )
 
     // Draw the loading indicator on a Canvas

@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Error
@@ -33,7 +33,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -55,15 +58,16 @@ import uk.ac.tees.mad.iplocator.viewmodel.SignUpScreenViewModel
 
 @Composable
 fun SignUpScreen(
-    navController: NavHostController,
-    viewModel: SignUpScreenViewModel = koinViewModel()
+    navController: NavHostController, viewModel: SignUpScreenViewModel = koinViewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isSignUpMode by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     val signUpResult by viewModel.signUpResult.collectAsStateWithLifecycle()
+    val focusManager = LocalFocusManager.current
+    val focusRequesterEmail = remember { FocusRequester() }
+    val focusRequesterPassword = remember { FocusRequester() }
     Scaffold(
         modifier = Modifier.fillMaxSize()
 
@@ -113,8 +117,11 @@ fun SignUpScreen(
                             OutlinedTextField(value = email,
                                 onValueChange = { email = it },
                                 label = { Text("Email") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterEmail),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(onNext = {
+                                    focusRequesterPassword.requestFocus()
+                                }),
                                 shape = RoundedCornerShape(8.dp),
                                 singleLine = true
                             )
@@ -122,9 +129,12 @@ fun SignUpScreen(
                             OutlinedTextField(value = password,
                                 onValueChange = { password = it },
                                 label = { Text("Password") },
+                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterPassword),
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(onDone = {
+                                    focusManager.clearFocus()
+                                }),
                                 shape = RoundedCornerShape(8.dp),
                                 singleLine = true,
                                 trailingIcon = {
@@ -163,7 +173,6 @@ fun SignUpScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 TextButton(onClick = {
-                                    errorMessage = null
                                     navController.navigate(SubGraph.AuthGraph) {
                                         popUpTo(SubGraph.AuthGraph) {
                                             inclusive = true
@@ -181,58 +190,60 @@ fun SignUpScreen(
             false -> {
                 when (val result = signUpResult) {
                     is AuthResult.Loading -> {
-                        AlertDialog(
-                            onDismissRequest = {
-                                isSignUpMode = !isSignUpMode
-                            },
+                        AlertDialog(onDismissRequest = {
+                            isSignUpMode = !isSignUpMode
+                        },
                             icon = { Icon(Icons.Default.CloudUpload, contentDescription = null) },
                             title = { Text("Loading") },
                             text = {
-                                Column(modifier = Modifier.fillMaxWidth()){
-                                CircularProgressIndicator(modifier = Modifier.size(48.dp).align(Alignment.CenterHorizontally))}
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .align(Alignment.CenterHorizontally)
+                                    )
+                                }
                             },
                             confirmButton = { })
                     }
 
                     is AuthResult.Success -> {
                         // Handle successful sign-up
-                        AlertDialog(
-                            icon = { Icon(Icons.Default.CloudDone, contentDescription = null) },
-                            title = { Text("Sign Up Successful") },
-                            text = {
-                                Column (
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ){
+                        AlertDialog(icon = {
+                            Icon(
+                                Icons.Default.CloudDone, contentDescription = null
+                            )
+                        }, title = { Text("Sign Up Successful") }, text = {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Text("You have successfully signed up.")
-                                }},
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    navController.navigate(SubGraph.AuthGraph) {
-                                        popUpTo(SubGraph.AuthGraph) {
-                                            inclusive = true
-                                        }
-                                    }
-                                }){
-                                    Text("Go to Login Screen")
-                                }
-                            },
-                            onDismissRequest = {
+                            }
+                        }, confirmButton = {
+                            TextButton(onClick = {
                                 navController.navigate(SubGraph.AuthGraph) {
                                     popUpTo(SubGraph.AuthGraph) {
                                         inclusive = true
                                     }
                                 }
+                            }) {
+                                Text("Go to Login Screen")
                             }
-                        )
+                        }, onDismissRequest = {
+                            navController.navigate(SubGraph.AuthGraph) {
+                                popUpTo(SubGraph.AuthGraph) {
+                                    inclusive = true
+                                }
+                            }
+                        })
 
                     }
 
                     is AuthResult.Error -> {
                         // Handle sign-up error
-                        AlertDialog(
-                            icon = { Icon(Icons.Default.Error, contentDescription = null) },
+                        AlertDialog(icon = { Icon(Icons.Default.Error, contentDescription = null) },
                             title = { Text("Error") },
                             text = {
                                 Column(
@@ -241,18 +252,18 @@ fun SignUpScreen(
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(result.exception.message.toString())
-                                }},
+                                }
+                            },
                             confirmButton = {
                                 TextButton(onClick = {
                                     isSignUpMode = !isSignUpMode
-                                }){
+                                }) {
                                     Text("Retry?")
                                 }
                             },
                             onDismissRequest = {
                                 isSignUpMode = !isSignUpMode
-                            }
-                        )
+                            })
                     }
                 }
             }
