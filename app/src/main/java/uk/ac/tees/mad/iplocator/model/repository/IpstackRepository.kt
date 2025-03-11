@@ -8,7 +8,7 @@ import uk.ac.tees.mad.iplocator.model.serviceapi.ipstackApiService
 import java.io.IOException
 
 class IpstackRepository(private val apiService: ipstackApiService) {
-    private val ACCESS_KEY = "1ae3a020da57eae8651552b2ebb9cc3f"
+    private val ACCESS_KEY = "03d2c74f011ff27228a11334c86102f5"
     //"d74b8e4638543d6fb83ee1c830c3443a"
 
     suspend fun getIpLocationDetails(ip: String): Result<IpLocation> {

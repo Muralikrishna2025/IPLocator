@@ -60,10 +60,10 @@ import uk.ac.tees.mad.iplocator.viewmodel.SignUpScreenViewModel
 fun SignUpScreen(
     navController: NavHostController, viewModel: SignUpScreenViewModel = koinViewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
-    var isSignUpMode by remember { mutableStateOf(true) }
+    val email by viewModel.email.collectAsStateWithLifecycle()
+    val password by viewModel.password.collectAsStateWithLifecycle()
+    val isPasswordVisible by viewModel.isPasswordVisible.collectAsStateWithLifecycle()
+    val isSignUpMode by viewModel.isSignUpMode.collectAsStateWithLifecycle()
     val signUpResult by viewModel.signUpResult.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val focusRequesterEmail = remember { FocusRequester() }
@@ -115,7 +115,9 @@ fun SignUpScreen(
                             )
 
                             OutlinedTextField(value = email,
-                                onValueChange = { email = it },
+                                onValueChange = {
+                                    viewModel.updateEmail(it)
+                                },
                                 label = { Text("Email") },
                                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterEmail),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,imeAction = ImeAction.Next),
@@ -127,7 +129,7 @@ fun SignUpScreen(
                             )
 
                             OutlinedTextField(value = password,
-                                onValueChange = { password = it },
+                                onValueChange = { viewModel.updatePassword(it)},
                                 label = { Text("Password") },
                                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterPassword),
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -139,7 +141,7 @@ fun SignUpScreen(
                                 singleLine = true,
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        isPasswordVisible = !isPasswordVisible
+                                        viewModel.togglePasswordVisibility()
                                     }) {
                                         Icon(
                                             imageVector = if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
@@ -152,7 +154,7 @@ fun SignUpScreen(
                                 enabled = email.isNotBlank() && password.isNotBlank(),
                                 onClick = {
                                     viewModel.signUp(email, password)
-                                    isSignUpMode = !isSignUpMode
+                                    viewModel.switchSignUpMode()
                                     // Placeholder for signup logic
                                     println("Sign Up button clicked with email: $email, password: $password")
                                 },
@@ -191,7 +193,7 @@ fun SignUpScreen(
                 when (val result = signUpResult) {
                     is AuthResult.Loading -> {
                         AlertDialog(onDismissRequest = {
-                            isSignUpMode = !isSignUpMode
+                            viewModel.switchSignUpMode()
                         },
                             icon = { Icon(Icons.Default.CloudUpload, contentDescription = null) },
                             title = { Text("Loading") },
@@ -256,13 +258,13 @@ fun SignUpScreen(
                             },
                             confirmButton = {
                                 TextButton(onClick = {
-                                    isSignUpMode = !isSignUpMode
+                                    viewModel.switchSignUpMode()
                                 }) {
                                     Text("Retry?")
                                 }
                             },
                             onDismissRequest = {
-                                isSignUpMode = !isSignUpMode
+                                viewModel.switchSignUpMode()
                             })
                     }
                 }

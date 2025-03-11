@@ -15,6 +15,7 @@ import uk.ac.tees.mad.iplocator.model.serviceapi.ipstackApiService
 import uk.ac.tees.mad.iplocator.ui.utils.NetworkConnectivityManager
 import uk.ac.tees.mad.iplocator.viewmodel.HomeScreenViewModel
 import uk.ac.tees.mad.iplocator.viewmodel.LoginScreenViewModel
+import uk.ac.tees.mad.iplocator.viewmodel.SearchScreenViewModel
 import uk.ac.tees.mad.iplocator.viewmodel.SignUpScreenViewModel
 import uk.ac.tees.mad.iplocator.viewmodel.SplashScreenViewModel
 
@@ -39,4 +40,5 @@ val appModule = module {
     viewModelOf(::SignUpScreenViewModel)
     viewModelOf(::LoginScreenViewModel)
     viewModelOf(::HomeScreenViewModel)
+    viewModelOf(::SearchScreenViewModel)
 }

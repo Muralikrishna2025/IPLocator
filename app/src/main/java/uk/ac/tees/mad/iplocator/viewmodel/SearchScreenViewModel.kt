@@ -17,22 +17,38 @@ import uk.ac.tees.mad.iplocator.model.repository.NetworkRepository
 import java.io.IOException
 import java.net.SocketTimeoutException
 
-class HomeScreenViewModel(
+class SearchScreenViewModel(
     private val networkRepository: NetworkRepository,
     private val ipstackRepository: IpstackRepository,
-    private val ipApiRepository: IpApiRepository
 ) : ViewModel() {
-
     private val _ipDetailsUiState = MutableStateFlow<IpDetailsUiState>(IpDetailsUiState.Loading)
     val ipDetailsUiState: StateFlow<IpDetailsUiState> = _ipDetailsUiState.asStateFlow()
-
-    private val _deviceIp: MutableStateFlow<String?> = MutableStateFlow(null)
-    val deviceIp = _deviceIp.asStateFlow()
 
     private val _ipLocation: MutableStateFlow<IpLocation?> = MutableStateFlow(null)
     val ipLocation: StateFlow<IpLocation?> = _ipLocation.asStateFlow()
 
     val isNetworkAvailable: Flow<Boolean> = networkRepository.isNetworkAvailable
+
+    private val _isErrorInput = MutableStateFlow(false)
+    val isErrorInput: StateFlow<Boolean> = _isErrorInput.asStateFlow()
+
+    private val _inputIp = MutableStateFlow("")
+    val inputIp: StateFlow<String> = _inputIp.asStateFlow()
+
+    private val _searchBarExpanded = MutableStateFlow(false)
+    val searchBarExpanded: StateFlow<Boolean> = _searchBarExpanded.asStateFlow()
+
+    fun updateInputIp(newInputIp: String) {
+        _inputIp.value = newInputIp
+    }
+
+    fun updateIsErrorInput(newIsErrorInput: Boolean) {
+        _isErrorInput.value = newIsErrorInput
+    }
+
+    fun updateSearchBarExpanded(newSearchBarExpanded: Boolean) {
+        _searchBarExpanded.value = newSearchBarExpanded
+    }
 
     private fun observeNetworkConnectivity() {
         viewModelScope.launch {
@@ -44,41 +60,6 @@ class HomeScreenViewModel(
                 }
             }
         }
-    }
-
-    fun getDeviceIP() {
-        viewModelScope.launch {
-            _ipDetailsUiState.value = IpDetailsUiState.Loading
-            ipApiRepository.getIpAddress().onSuccess { fetchedIp ->
-                _deviceIp.value = fetchedIp
-                getIpLocationDetails(fetchedIp)
-            }.onFailure { exception ->
-                val errorState = when (exception) {
-                    is SocketTimeoutException -> {
-                        // `Log.e` is used to log errors to the console.
-                        Log.e("myApp", "Connection timed out: ${exception.message}")
-                        ErrorState.TimeoutError
-                    }
-
-                    is IOException -> {
-                        Log.e("myApp", "No internet connection: ${exception.message}")
-                        ErrorState.NetworkError
-                    }
-
-                    else -> {
-                        Log.e("myApp", "Error fetching items: ${exception.message}")
-                        ErrorState.UnknownError
-                    }
-                }
-                _ipDetailsUiState.value =
-                    IpDetailsUiState.Error(errorState, exception.message.toString())
-            }
-        }
-    }
-
-
-    init {
-        getDeviceIP()
     }
 
     fun getIpLocationDetails(ip: String) {
@@ -109,7 +90,5 @@ class HomeScreenViewModel(
                     IpDetailsUiState.Error(errorState, exception.message.toString())
             }
         }
-
     }
-
 }

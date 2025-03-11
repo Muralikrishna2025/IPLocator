@@ -61,10 +61,10 @@ import uk.ac.tees.mad.iplocator.viewmodel.LoginScreenViewModel
 fun LoginScreen(
     navController: NavHostController, viewModel: LoginScreenViewModel = koinViewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
-    var isLoginMode by remember { mutableStateOf(true) }
+    val email by viewModel.email.collectAsStateWithLifecycle()
+    val password by viewModel.password.collectAsStateWithLifecycle()
+    val isPasswordVisible by viewModel.isPasswordVisible.collectAsStateWithLifecycle()
+    val isLoginMode by viewModel.isLoginMode.collectAsStateWithLifecycle()
     val logInResult by viewModel.logInResult.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val focusRequesterEmail = remember { FocusRequester() }
@@ -116,7 +116,9 @@ fun LoginScreen(
 
                             OutlinedTextField(value = email,
                                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterEmail),
-                                onValueChange = { email = it },
+                                onValueChange = {
+                                    viewModel.updateEmail(it)
+                                },
                                 label = { Text("Email") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,imeAction = ImeAction.Next),
                                 keyboardActions = KeyboardActions(onNext = {
@@ -127,7 +129,9 @@ fun LoginScreen(
                             )
 
                             OutlinedTextField(value = password,
-                                onValueChange = { password = it },
+                                onValueChange = {
+                                    viewModel.updatePassword(it)
+                                },
                                 label = { Text("Password") },
                                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterPassword),
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -139,7 +143,7 @@ fun LoginScreen(
                                 singleLine = true,
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        isPasswordVisible = !isPasswordVisible
+                                        viewModel.togglePasswordVisibility()
                                     }) {
                                         Icon(
                                             imageVector = if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
@@ -155,7 +159,7 @@ fun LoginScreen(
                                     println("Login button clicked with email: $email, password: $password")
 
                                     viewModel.logIn(email, password)
-                                    isLoginMode = !isLoginMode
+                                    viewModel.switchLoginMode()
 
                                     //onLoginSuccess()
                                 },
@@ -176,6 +180,8 @@ fun LoginScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 TextButton(onClick = {
+                                    viewModel.updateEmail("")
+                                    viewModel.updatePassword("")
                                     navController.navigate(Dest.SignUpScreen)
                                 }) {
                                     Text("Sign Up")
@@ -190,7 +196,7 @@ fun LoginScreen(
                 when (val result = logInResult) {
                     is AuthResult.Loading -> {
                         AlertDialog(onDismissRequest = {
-                            isLoginMode = !isLoginMode
+                            viewModel.switchLoginMode()
                         },
                             icon = { Icon(Icons.Default.CloudUpload, contentDescription = null) },
                             title = { Text("Loading") },
@@ -255,13 +261,13 @@ fun LoginScreen(
                             },
                             confirmButton = {
                                 TextButton(onClick = {
-                                    isLoginMode = !isLoginMode
+                                    viewModel.switchLoginMode()
                                 }) {
                                     Text("Retry?")
                                 }
                             },
                             onDismissRequest = {
-                                isLoginMode = !isLoginMode
+                                viewModel.switchLoginMode()
                             })
                     }
                 }
