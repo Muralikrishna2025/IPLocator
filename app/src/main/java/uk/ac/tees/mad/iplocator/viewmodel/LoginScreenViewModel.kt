@@ -15,16 +15,16 @@ class LoginScreenViewModel(private val authRepository: AuthRepository) : ViewMod
     val logInResult: StateFlow<AuthResult<Boolean>> = _logInResult.asStateFlow()
 
     private val _email = MutableStateFlow("")
-    val email=_email.asStateFlow()
+    val email = _email.asStateFlow()
 
     private val _password = MutableStateFlow("")
-    val password=_password.asStateFlow()
+    val password = _password.asStateFlow()
 
     private val _isPasswordVisible = MutableStateFlow(false)
-    val isPasswordVisible=_isPasswordVisible.asStateFlow()
+    val isPasswordVisible = _isPasswordVisible.asStateFlow()
 
     private val _isLoginMode = MutableStateFlow(true)
-    val isLoginMode=_isLoginMode.asStateFlow()
+    val isLoginMode = _isLoginMode.asStateFlow()
 
     fun updateEmail(newEmail: String) {
         _email.value = newEmail

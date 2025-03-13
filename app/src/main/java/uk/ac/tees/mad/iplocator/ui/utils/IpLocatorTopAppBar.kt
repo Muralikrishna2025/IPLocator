@@ -18,11 +18,10 @@ import uk.ac.tees.mad.iplocator.navigation.Dest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IpLocatorTopAppBar(
-    title: String,
-    scrollBehavior: TopAppBarScrollBehavior,
-    navController: NavController
+    title: String, scrollBehavior: TopAppBarScrollBehavior, navController: NavController
 ) {
-    CenterAlignedTopAppBar(title = { Text(title) },
+    CenterAlignedTopAppBar(
+        title = { Text(title) },
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate(Dest.ProfileScreen)

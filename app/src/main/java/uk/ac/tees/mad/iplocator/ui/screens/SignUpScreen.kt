@@ -34,9 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -119,8 +117,13 @@ fun SignUpScreen(
                                     viewModel.updateEmail(it)
                                 },
                                 label = { Text("Email") },
-                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterEmail),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,imeAction = ImeAction.Next),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequesterEmail),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Email,
+                                    imeAction = ImeAction.Next
+                                ),
                                 keyboardActions = KeyboardActions(onNext = {
                                     focusRequesterPassword.requestFocus()
                                 }),
@@ -129,11 +132,16 @@ fun SignUpScreen(
                             )
 
                             OutlinedTextField(value = password,
-                                onValueChange = { viewModel.updatePassword(it)},
+                                onValueChange = { viewModel.updatePassword(it) },
                                 label = { Text("Password") },
-                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequesterPassword),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequesterPassword),
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,imeAction = ImeAction.Done),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Done
+                                ),
                                 keyboardActions = KeyboardActions(onDone = {
                                     focusManager.clearFocus()
                                 }),

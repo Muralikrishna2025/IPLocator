@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import uk.ac.tees.mad.iplocator.model.dataclass.ErrorState
 import uk.ac.tees.mad.iplocator.model.dataclass.IpDetailsUiState
 import uk.ac.tees.mad.iplocator.model.dataclass.IpLocation
-import uk.ac.tees.mad.iplocator.model.repository.IpApiRepository
 import uk.ac.tees.mad.iplocator.model.repository.IpstackRepository
 import uk.ac.tees.mad.iplocator.model.repository.NetworkRepository
 import java.io.IOException

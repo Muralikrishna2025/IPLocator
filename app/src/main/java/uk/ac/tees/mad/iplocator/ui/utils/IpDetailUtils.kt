@@ -37,7 +37,7 @@ import uk.ac.tees.mad.iplocator.R
 import uk.ac.tees.mad.iplocator.model.dataclass.IpLocation
 
 @Composable
-fun HeaderCard(header:String,ipLocation: IpLocation) {
+fun HeaderCard(header: String, ipLocation: IpLocation) {
     Column {
         Card(
             modifier = Modifier
@@ -84,7 +84,7 @@ fun DetailRow(label: String, value: String) {
 }
 
 @Composable
-fun CountryFlag(label: String, url: String){
+fun CountryFlag(label: String, url: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,10 +93,8 @@ fun CountryFlag(label: String, url: String){
     ) {
         Text(text = "$label:", fontWeight = FontWeight.Bold)
         SubcomposeAsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(url).decoderFactory(SvgDecoder.Factory())
-                .crossfade(true).size(300)
-                .build(),
+            model = ImageRequest.Builder(LocalContext.current).data(url)
+                .decoderFactory(SvgDecoder.Factory()).crossfade(true).size(300).build(),
             contentDescription = "Country Flag",
             loading = {
                 Box(
@@ -170,7 +168,7 @@ fun LocationDetail(ipLocation: IpLocation) {
 }
 
 @Composable
-fun Coordinates(ipLocation: IpLocation){
+fun Coordinates(ipLocation: IpLocation) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -284,7 +282,7 @@ fun AdditionalInfo(ipLocation: IpLocation) {
                 DetailRow(
                     label = "Flag Emoji", value = "${ipLocation.location?.countryFlagEmoji}"
                 )
-                CountryFlag(label = "Country Flag",url="${ipLocation.location?.countryFlag}")
+                CountryFlag(label = "Country Flag", url = "${ipLocation.location?.countryFlag}")
             }
         }
     }

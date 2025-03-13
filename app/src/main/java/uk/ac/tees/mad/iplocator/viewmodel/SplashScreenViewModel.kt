@@ -14,8 +14,7 @@ import uk.ac.tees.mad.iplocator.model.repository.AuthRepository
 import uk.ac.tees.mad.iplocator.model.repository.NetworkRepository
 
 class SplashScreenViewModel(
-    private val networkRepository: NetworkRepository,
-    private val authRepository: AuthRepository
+    private val networkRepository: NetworkRepository, private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _loadingState = MutableStateFlow<LoadingState<Any>>(LoadingState.Loading)
