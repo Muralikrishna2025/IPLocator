@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.iplocator.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -27,6 +29,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
@@ -34,6 +38,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import org.koin.androidx.compose.koinViewModel
 import uk.ac.tees.mad.iplocator.model.dataclass.IpDetailsUiState
+import uk.ac.tees.mad.iplocator.model.dataclass.SearchHistoryItem
 import uk.ac.tees.mad.iplocator.navigation.Dest
 import uk.ac.tees.mad.iplocator.ui.utils.AdditionalInfo
 import uk.ac.tees.mad.iplocator.ui.utils.Coordinates
@@ -66,6 +73,7 @@ fun SearchScreen(
     val isErrorInput by viewModel.isErrorInput.collectAsStateWithLifecycle()
     val ipDetailsUiState by viewModel.ipDetailsUiState.collectAsStateWithLifecycle()
     val inputIp by viewModel.inputIp.collectAsStateWithLifecycle()
+    val searchHistory by viewModel.searchHistory.collectAsStateWithLifecycle()
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -102,7 +110,7 @@ fun SearchScreen(
         floatingActionButtonPosition = FabPosition.Center
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            IpSearchBar(viewModel = viewModel, modifier = Modifier, onSearch = { ip, isError ->
+            IpSearchBar(viewModel = viewModel, modifier = Modifier,searchHistory = searchHistory,onSearch = { ip, isError ->
                 viewModel.updateIsErrorInput(isError)
                 if (!isError) {
                     viewModel.updateInputIp(ip)
@@ -174,11 +182,13 @@ fun SearchScreen(
 fun IpSearchBar(
     viewModel: SearchScreenViewModel,
     modifier: Modifier = Modifier,
+    searchHistory: List<SearchHistoryItem>,
     onSearch: (ip: String, isError: Boolean) -> Unit
 ) {
     val expanded by viewModel.searchBarExpanded.collectAsStateWithLifecycle()
     var ipAddress by rememberSaveable { mutableStateOf("") }
     var isError by rememberSaveable { mutableStateOf(false) }
+
 
     fun validateIpAddress(ip: String): Boolean {
         val ipPattern = Regex(
@@ -191,10 +201,10 @@ fun IpSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
-        colors = if (isError) SearchBarDefaults.colors(MaterialTheme.colorScheme.errorContainer) else SearchBarDefaults.colors(),
         inputField = {
             SearchBarDefaults.InputField(
                 modifier = Modifier.fillMaxWidth(),
+                colors = if (isError) SearchBarDefaults.inputFieldColors(MaterialTheme.colorScheme.error) else SearchBarDefaults.inputFieldColors(),
                 query = ipAddress,
                 onQueryChange = {
                     // Only allow digits and periods
@@ -237,28 +247,7 @@ fun IpSearchBar(
             viewModel.updateSearchBarExpanded(it)
         },
     ) {
-        if (ipAddress.isNotBlank()) {
-            if (isError) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.4f),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Invalid IP address format (e.g., 192.168.1.1)",
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-
-                }
-            }
-        } else {
+        if(searchHistory.isEmpty() || ipAddress.isBlank()){
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -269,6 +258,29 @@ fun IpSearchBar(
                 Text("Start Typing to Search")
                 Text("Only digits and periods are allowed!")
             }
+        } else if (ipAddress.isNotBlank()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(searchHistory){item->
+                        ListItem(headlineContent = { Text(item.searchedQuery) },
+                            colors = ListItemDefaults.colors(
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            ),
+                            modifier = Modifier.clickable {
+                                ipAddress = item.searchedQuery
+                                isError = false
+                                viewModel.updateSearchBarExpanded(false)
+                                onSearch(ipAddress, isError)
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Search, contentDescription = null
+                                )
+                            })
+
+                    }
+                }
         }
     }
 

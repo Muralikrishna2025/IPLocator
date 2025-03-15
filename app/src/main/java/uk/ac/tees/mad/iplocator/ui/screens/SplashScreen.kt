@@ -53,10 +53,9 @@ fun SplashScreen(
                     }
 
                     is LoadingState.Success -> {
-                        val isUserLoggedOut = true
-                        //viewModel.getAuthState()
+                        val isUserLoggedIn = viewModel.isLoggedIn()
                         LaunchedEffect(key1 = Unit) {
-                            if (isUserLoggedOut) {
+                            if (!isUserLoggedIn) {
                                 navController.navigate(SubGraph.AuthGraph) {
                                     popUpTo(Dest.SplashScreen) {
                                         inclusive = true
