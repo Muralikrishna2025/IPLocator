@@ -7,15 +7,11 @@ import java.time.LocalDateTime
 
 @Entity(tableName = "search_history")
 data class SearchHistoryItem(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0, // Auto-generated primary key
+    @PrimaryKey(autoGenerate = true) val id: Int = 0, // Auto-generated primary key
 
-    @ColumnInfo(name = "user_id")
-    val userId: String, // Firebase user ID
+    @ColumnInfo(name = "user_id") val userId: String, // Firebase user ID
 
-    @ColumnInfo(name = "searched_query")
-    val searchedQuery: String, // The IP address or query searched
+    @ColumnInfo(name = "searched_query") val searchedQuery: String, // The IP address or query searched
 
-    @ColumnInfo(name = "timestamp")
-    val timestamp: LocalDateTime // Timestamp of the search
+    @ColumnInfo(name = "timestamp") val timestamp: LocalDateTime // Timestamp of the search
 )

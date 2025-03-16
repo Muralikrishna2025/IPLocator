@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import uk.ac.tees.mad.iplocator.ui.screens.HomeScreen
 import uk.ac.tees.mad.iplocator.ui.screens.LoginScreen
 import uk.ac.tees.mad.iplocator.ui.screens.MapScreen
@@ -37,7 +38,12 @@ fun SetupNavGraph(navController: NavHostController) {
                 SearchScreen(navController = navController)
             }
             composable<Dest.MapScreen> {
-                MapScreen(navController = navController)
+                val args = it.toRoute<Dest.MapScreen>()
+                MapScreen(
+                    navController = navController,
+                    latitude = args.latitude,
+                    longitude = args.longitude
+                )
             }
             composable<Dest.ProfileScreen> {
                 ProfileScreen(navController = navController)

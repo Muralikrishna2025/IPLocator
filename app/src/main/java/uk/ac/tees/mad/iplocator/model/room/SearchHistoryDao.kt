@@ -3,7 +3,6 @@ package uk.ac.tees.mad.iplocator.model.room
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 import uk.ac.tees.mad.iplocator.model.dataclass.SearchHistoryItem
 import java.time.LocalDateTime
 
@@ -31,7 +30,11 @@ interface SearchHistoryDao {
     suspend fun countQueriesForUser(userId: String, query: String): Int
 
     @Query("UPDATE search_history SET timestamp = :newTimestamp WHERE user_id = :userId AND searched_query = :query")
-    suspend fun updateTimestampForExistingQuery(userId: String, query: String, newTimestamp: LocalDateTime)
+    suspend fun updateTimestampForExistingQuery(
+        userId: String,
+        query: String,
+        newTimestamp: LocalDateTime
+    )
 
 
 }

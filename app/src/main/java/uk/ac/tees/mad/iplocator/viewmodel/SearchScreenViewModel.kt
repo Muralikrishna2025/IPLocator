@@ -1,8 +1,6 @@
 package uk.ac.tees.mad.iplocator.viewmodel
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +54,7 @@ class SearchScreenViewModel(
         loadData()
     }
 
-    private fun loadData(){
+    private fun loadData() {
         viewModelScope.launch {
             val userId = getCurrentUserId()
             if (userId != null) {
@@ -64,8 +62,9 @@ class SearchScreenViewModel(
                 _searchHistory.update {
                     searchHistoryRepository.getSearchHistoryForUser(userId)
                 }
+            }
         }
-    }}
+    }
 
     fun updateInputIp(newInputIp: String) {
         _inputIp.value = newInputIp
@@ -137,17 +136,28 @@ class SearchScreenViewModel(
         viewModelScope.launch {
             val currentTimestamp = LocalDateTime.now()
             // Try to update the timestamp first
-            if (searchHistoryRepository.isQueryPresent(userId,query)){
-            searchHistoryRepository.updateTimestampForExistingQuery(userId, query, currentTimestamp)} else {
+            if (searchHistoryRepository.isQueryPresent(userId, query)) {
+                searchHistoryRepository.updateTimestampForExistingQuery(
+                    userId,
+                    query,
+                    currentTimestamp
+                )
+            } else {
 
-            // If no rows were updated (meaning the query didn't exist), insert a new row
-            val searchHistoryItem = SearchHistoryItem(userId = userId, searchedQuery = query, timestamp = currentTimestamp)
-            searchHistoryRepository.insertSearchHistory(searchHistoryItem)}
+                // If no rows were updated (meaning the query didn't exist), insert a new row
+                val searchHistoryItem = SearchHistoryItem(
+                    userId = userId,
+                    searchedQuery = query,
+                    timestamp = currentTimestamp
+                )
+                searchHistoryRepository.insertSearchHistory(searchHistoryItem)
+            }
             _searchHistory.update {
                 searchHistoryRepository.getSearchHistoryForUser(userId)
             }
         }
     }
 
-    suspend fun getSearchHistory(userId: String) = searchHistoryRepository.getSearchHistoryForUser(userId)
+    suspend fun getSearchHistory(userId: String) =
+        searchHistoryRepository.getSearchHistoryForUser(userId)
 }

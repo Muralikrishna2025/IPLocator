@@ -38,8 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -95,28 +93,38 @@ fun SearchScreen(
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(!isErrorInput && inputIp.isNotBlank()) {
-                ExtendedFloatingActionButton(onClick = { navController.navigate(Dest.MapScreen) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Explore,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+            AnimatedVisibility(!isErrorInput && inputIp.isNotBlank() && ipDetailsUiState is IpDetailsUiState.Success) {
+                val ipLocation = (ipDetailsUiState as IpDetailsUiState.Success).ipLocationDetails
+                ExtendedFloatingActionButton(onClick = {
+                    navController.navigate(
+                        Dest.MapScreen(
+                            ipLocation.latitude,
+                            ipLocation.longitude
                         )
-                    },
-                    text = { Text("Go to Map Screen") })
+                    )
+                }, icon = {
+                    Icon(
+                        imageVector = Icons.Default.Explore,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }, text = { Text("Go to Map Screen") })
             }
         },
         floatingActionButtonPosition = FabPosition.Center
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            IpSearchBar(viewModel = viewModel, modifier = Modifier,searchHistory = searchHistory,onSearch = { ip, isError ->
-                viewModel.updateIsErrorInput(isError)
-                if (!isError) {
-                    viewModel.updateInputIp(ip)
-                    viewModel.getIpLocationDetails(ip)
-                }
-            })
+            IpSearchBar(
+                viewModel = viewModel,
+                modifier = Modifier,
+                searchHistory = searchHistory,
+                onSearch = { ip, isError ->
+                    viewModel.updateIsErrorInput(isError)
+                    if (!isError) {
+                        viewModel.updateInputIp(ip)
+                        viewModel.getIpLocationDetails(ip)
+                    }
+                })
             AnimatedVisibility(visible = isErrorInput) {
                 Text(
                     text = "Invalid IP address format (e.g., 192.168.1.1)",
@@ -154,8 +162,7 @@ fun SearchScreen(
                                     span = StaggeredGridItemSpan.FullLine
                                 ) {
                                     HeaderCard(
-                                        header = "Viewing Results for",
-                                        ipLocation = ipLocation
+                                        header = "Viewing Results for", ipLocation = ipLocation
                                     )
                                 }
                                 item { LocationDetail(ipLocation) }
@@ -247,7 +254,7 @@ fun IpSearchBar(
             viewModel.updateSearchBarExpanded(it)
         },
     ) {
-        if(searchHistory.isEmpty() || ipAddress.isBlank()){
+        if (searchHistory.isEmpty() || ipAddress.isBlank()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -259,28 +266,28 @@ fun IpSearchBar(
                 Text("Only digits and periods are allowed!")
             }
         } else if (ipAddress.isNotBlank()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(searchHistory){item->
-                        ListItem(headlineContent = { Text(item.searchedQuery) },
-                            colors = ListItemDefaults.colors(
-                                MaterialTheme.colorScheme.surfaceContainerHigh
-                            ),
-                            modifier = Modifier.clickable {
-                                ipAddress = item.searchedQuery
-                                isError = false
-                                viewModel.updateSearchBarExpanded(false)
-                                onSearch(ipAddress, isError)
-                            },
-                            leadingContent = {
-                                Icon(
-                                    Icons.Filled.Search, contentDescription = null
-                                )
-                            })
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(searchHistory) { item ->
+                    ListItem(headlineContent = { Text(item.searchedQuery) },
+                        colors = ListItemDefaults.colors(
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        ),
+                        modifier = Modifier.clickable {
+                            ipAddress = item.searchedQuery
+                            isError = false
+                            viewModel.updateSearchBarExpanded(false)
+                            onSearch(ipAddress, isError)
+                        },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.Search, contentDescription = null
+                            )
+                        })
 
-                    }
                 }
+            }
         }
     }
 

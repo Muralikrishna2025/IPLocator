@@ -36,14 +36,12 @@ val appModule = module {
     single<ipApiService> { IpApiRetrofitInstance.create() }
 
     // Search History Database
-    single{
+    single {
         Room.databaseBuilder(
-            androidApplication(),
-            SearchHistoryDB::class.java,
-            "search_history_db"
+            androidApplication(), SearchHistoryDB::class.java, "search_history_db"
         ).build()
     }
-    single{
+    single {
         val database = get<SearchHistoryDB>()
         database.searchHistoryDao()
     }
@@ -51,7 +49,7 @@ val appModule = module {
     // Repository
     single { IpstackRepository(get()) }
     single { IpApiRepository(get()) }
-    single{SearchHistoryRepository(get())}
+    single { SearchHistoryRepository(get()) }
 
     // ViewModels
     viewModelOf(::SplashScreenViewModel)

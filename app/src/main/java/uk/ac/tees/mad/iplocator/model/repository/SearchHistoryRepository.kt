@@ -1,6 +1,5 @@
 package uk.ac.tees.mad.iplocator.model.repository
 
-import kotlinx.coroutines.flow.Flow
 import uk.ac.tees.mad.iplocator.model.dataclass.SearchHistoryItem
 import uk.ac.tees.mad.iplocator.model.room.SearchHistoryDao
 import java.time.LocalDateTime
@@ -30,7 +29,11 @@ class SearchHistoryRepository(private val searchHistoryDao: SearchHistoryDao) {
         return searchHistoryDao.getSearchHistoryItem(id)
     }
 
-    suspend fun updateTimestampForExistingQuery(userId: String, query: String, newTimestamp: LocalDateTime) {
+    suspend fun updateTimestampForExistingQuery(
+        userId: String,
+        query: String,
+        newTimestamp: LocalDateTime
+    ) {
         searchHistoryDao.updateTimestampForExistingQuery(userId, query, newTimestamp)
     }
 
