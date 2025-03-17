@@ -2,10 +2,12 @@ package uk.ac.tees.mad.iplocator.model.repository
 
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.iplocator.model.dataclass.AuthResult
+import uk.ac.tees.mad.iplocator.model.dataclass.UserDetails
 
 
 class AuthRepository(private val auth: FirebaseAuth) {
@@ -47,6 +49,27 @@ class AuthRepository(private val auth: FirebaseAuth) {
 
     fun LogOut() {
         auth.signOut()
+    }
+
+    fun getCurrentUserDetails(): Flow<AuthResult<UserDetails>> = flow {
+        emit(AuthResult.Loading)
+        try {
+            val currentUser: FirebaseUser? = auth.currentUser
+            if (currentUser != null) {
+                val userDetails = UserDetails(
+                    userId = currentUser.uid,
+                    email = currentUser.email,
+                    displayName = currentUser.displayName,
+                    isEmailVerified = currentUser.isEmailVerified,
+                    phoneNumber = currentUser.phoneNumber
+                )
+                emit(AuthResult.Success(userDetails))
+            } else {
+                emit(AuthResult.Error(Exception("No user logged in")))
+            }
+        } catch (e: Exception) {
+            emit(AuthResult.Error(e))
+        }
     }
 
 }
