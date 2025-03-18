@@ -27,7 +27,7 @@ sealed class Dest {
     data object SearchScreen : Dest()
 
     @Serializable
-    data class MapScreen(val latitude: Double?, val longitude: Double?) : Dest()
+    data class MapScreen(val latitude: Double?, val longitude: Double?, val ip: String?) : Dest()
 
     @Serializable
     data object ProfileScreen : Dest()

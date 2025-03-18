@@ -42,7 +42,8 @@ fun SetupNavGraph(navController: NavHostController) {
                 MapScreen(
                     navController = navController,
                     latitude = args.latitude,
-                    longitude = args.longitude
+                    longitude = args.longitude,
+                    ip = args.ip
                 )
             }
             composable<Dest.ProfileScreen> {

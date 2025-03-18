@@ -64,7 +64,8 @@ fun HomeScreen(
                     navController.navigate(
                         Dest.MapScreen(
                             ipLocation.latitude,
-                            ipLocation.longitude
+                            ipLocation.longitude,
+                            ipLocation.ip
                         )
                     )
                 }, icon = {
