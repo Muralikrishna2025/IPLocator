@@ -93,14 +93,14 @@ fun SearchScreen(
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(!isErrorInput && inputIp.isNotBlank() && ipDetailsUiState is IpDetailsUiState.Success) {
-                val ipLocation = (ipDetailsUiState as IpDetailsUiState.Success).ipLocationDetails
+            AnimatedVisibility(!isErrorInput && inputIp.isNotBlank()) {
+                val ipLocation by viewModel.ipLocation.collectAsStateWithLifecycle()
                 ExtendedFloatingActionButton(onClick = {
                     navController.navigate(
                         Dest.MapScreen(
-                            ipLocation.latitude,
-                            ipLocation.longitude,
-                            ipLocation.ip
+                            ipLocation?.latitude,
+                            ipLocation?.longitude,
+                            ipLocation?.ip
                         )
                     )
                 }, icon = {

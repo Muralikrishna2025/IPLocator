@@ -1,16 +1,22 @@
 package uk.ac.tees.mad.iplocator
 
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import uk.ac.tees.mad.iplocator.navigation.SetupNavGraph
+import uk.ac.tees.mad.iplocator.ui.screens.LocalIsDarkMode
 import uk.ac.tees.mad.iplocator.ui.theme.IPLocatorTheme
 
 class MainActivity : ComponentActivity() {
@@ -41,9 +47,15 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            IPLocatorTheme {
+            val sharedPreferences = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val isDarkMode = remember {
+                mutableStateOf(sharedPreferences.getBoolean("dark_mode", true))
+            }
+            CompositionLocalProvider(LocalIsDarkMode provides isDarkMode){
+            IPLocatorTheme(darkTheme = isDarkMode.value) {
                 val navController = rememberNavController()
                 SetupNavGraph(navController = navController)
+            }
             }
         }
     }

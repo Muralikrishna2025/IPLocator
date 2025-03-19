@@ -60,6 +60,7 @@ fun HomeScreen(
         floatingActionButton = {
             AnimatedVisibility(deviceIp != null && ipDetailsUiState is IpDetailsUiState.Success) {
                 val ipLocation = (ipDetailsUiState as IpDetailsUiState.Success).ipLocationDetails
+                if(ipLocation.latitude != null && ipLocation.longitude != null){
                 ExtendedFloatingActionButton(onClick = {
                     navController.navigate(
                         Dest.MapScreen(
@@ -74,7 +75,7 @@ fun HomeScreen(
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
-                }, text = { Text("Go to Map Screen") })
+                }, text = { Text("Go to Map Screen") })}
             }
         },
         floatingActionButtonPosition = FabPosition.Center
