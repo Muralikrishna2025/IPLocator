@@ -122,8 +122,7 @@ fun LoginScreen(
                                 },
                                 label = { Text("Email") },
                                 keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Email,
-                                    imeAction = ImeAction.Next
+                                    keyboardType = KeyboardType.Email, imeAction = ImeAction.Next
                                 ),
                                 keyboardActions = KeyboardActions(onNext = {
                                     focusRequesterPassword.requestFocus()
@@ -142,8 +141,7 @@ fun LoginScreen(
                                     .focusRequester(focusRequesterPassword),
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                 keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Password,
-                                    imeAction = ImeAction.Done
+                                    keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
                                 ),
                                 keyboardActions = KeyboardActions(onDone = {
                                     focusManager.clearFocus()
@@ -223,35 +221,11 @@ fun LoginScreen(
 
                     is AuthResult.Success -> {
                         // Handle successful sign-up
-                        AlertDialog(icon = {
-                            Icon(
-                                Icons.Default.CloudDone, contentDescription = null
-                            )
-                        }, title = { Text("Log in Successful") }, text = {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("You have successfully Logged in.")
+                        navController.navigate(SubGraph.HomeGraph) {
+                            popUpTo(SubGraph.AuthGraph) {
+                                inclusive = true
                             }
-                        }, confirmButton = {
-                            TextButton(onClick = {
-                                navController.navigate(SubGraph.HomeGraph) {
-                                    popUpTo(SubGraph.AuthGraph) {
-                                        inclusive = true
-                                    }
-                                }
-                            }) {
-                                Text("Go to Home Screen")
-                            }
-                        }, onDismissRequest = {
-                            navController.navigate(SubGraph.HomeGraph) {
-                                popUpTo(SubGraph.AuthGraph) {
-                                    inclusive = true
-                                }
-                            }
-                        })
+                        }
 
                     }
 

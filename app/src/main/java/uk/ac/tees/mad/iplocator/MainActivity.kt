@@ -8,7 +8,6 @@ import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,15 +46,15 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            val sharedPreferences = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val sharedPreferences = getSharedPreferences("app_settings", MODE_PRIVATE)
             val isDarkMode = remember {
                 mutableStateOf(sharedPreferences.getBoolean("dark_mode", true))
             }
-            CompositionLocalProvider(LocalIsDarkMode provides isDarkMode){
-            IPLocatorTheme(darkTheme = isDarkMode.value) {
-                val navController = rememberNavController()
-                SetupNavGraph(navController = navController)
-            }
+            CompositionLocalProvider(LocalIsDarkMode provides isDarkMode) {
+                IPLocatorTheme(darkTheme = isDarkMode.value) {
+                    val navController = rememberNavController()
+                    SetupNavGraph(navController = navController)
+                }
             }
         }
     }

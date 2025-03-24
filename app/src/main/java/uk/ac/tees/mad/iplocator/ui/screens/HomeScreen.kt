@@ -1,7 +1,9 @@
 package uk.ac.tees.mad.iplocator.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -22,6 +24,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
@@ -54,28 +57,30 @@ fun HomeScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             IpLocatorTopAppBar(
-                title = "IP Locator", scrollBehavior = scrollBehavior, navController = navController
+                title = "IP Locator",
+                scrollBehavior = scrollBehavior,
+                navController = navController,
+                ipDetailsUiState
             )
         },
         floatingActionButton = {
             AnimatedVisibility(deviceIp != null && ipDetailsUiState is IpDetailsUiState.Success) {
                 val ipLocation = (ipDetailsUiState as IpDetailsUiState.Success).ipLocationDetails
-                if(ipLocation.latitude != null && ipLocation.longitude != null){
-                ExtendedFloatingActionButton(onClick = {
-                    navController.navigate(
-                        Dest.MapScreen(
-                            ipLocation.latitude,
-                            ipLocation.longitude,
-                            ipLocation.ip
+                if (ipLocation.latitude != null && ipLocation.longitude != null) {
+                    ExtendedFloatingActionButton(onClick = {
+                        navController.navigate(
+                            Dest.MapScreen(
+                                ipLocation.latitude, ipLocation.longitude, ipLocation.ip
+                            )
                         )
-                    )
-                }, icon = {
-                    Icon(
-                        imageVector = Icons.Default.Explore,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }, text = { Text("Go to Map Screen") })}
+                    }, icon = {
+                        Icon(
+                            imageVector = Icons.Default.Explore,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }, text = { Text("Go to Map Screen") })
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.Center
@@ -104,24 +109,34 @@ fun HomeScreen(
                 is IpDetailsUiState.Success -> {
                     val ipLocation =
                         (ipDetailsUiState as IpDetailsUiState.Success).ipLocationDetails
-                    LazyVerticalStaggeredGrid(
-                        columns = StaggeredGridCells.Adaptive(400.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        item(
-                            span = StaggeredGridItemSpan.FullLine
+                    if (ipLocation.latitude != null && ipLocation.longitude != null) {
+                        LazyVerticalStaggeredGrid(
+                            columns = StaggeredGridCells.Adaptive(400.dp),
+                            modifier = Modifier.fillMaxSize()
                         ) {
-                            HeaderCard(header = "Your", ipLocation = ipLocation)
-                        }
-                        item { LocationDetail(ipLocation) }
-                        item { Coordinates(ipLocation) }
-                        item { ISPDetail(ipLocation) }
-                        item { AdditionalInfo(ipLocation) }
+                            item(
+                                span = StaggeredGridItemSpan.FullLine
+                            ) {
+                                HeaderCard(header = "Your", ipLocation = ipLocation)
+                            }
+                            item { LocationDetail(ipLocation) }
+                            item { Coordinates(ipLocation) }
+                            item { ISPDetail(ipLocation) }
+                            item { AdditionalInfo(ipLocation) }
 //            item { TimezoneDetail(ipLocation) }
 //            item { CurrencyDetail(ipLocation) }
-                        item(
-                            span = StaggeredGridItemSpan.FullLine
-                        ) { Spacer(modifier = Modifier.height(80.dp)) }
+                            item(
+                                span = StaggeredGridItemSpan.FullLine
+                            ) { Spacer(modifier = Modifier.height(80.dp)) }
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "ipstack API key limit reached")
+                        }
                     }
 
                 }

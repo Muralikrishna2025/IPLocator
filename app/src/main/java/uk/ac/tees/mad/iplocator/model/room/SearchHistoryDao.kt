@@ -31,9 +31,7 @@ interface SearchHistoryDao {
 
     @Query("UPDATE search_history SET timestamp = :newTimestamp WHERE user_id = :userId AND searched_query = :query")
     suspend fun updateTimestampForExistingQuery(
-        userId: String,
-        query: String,
-        newTimestamp: LocalDateTime
+        userId: String, query: String, newTimestamp: LocalDateTime
     )
 
 

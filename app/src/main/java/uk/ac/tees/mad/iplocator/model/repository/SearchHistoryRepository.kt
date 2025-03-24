@@ -30,9 +30,7 @@ class SearchHistoryRepository(private val searchHistoryDao: SearchHistoryDao) {
     }
 
     suspend fun updateTimestampForExistingQuery(
-        userId: String,
-        query: String,
-        newTimestamp: LocalDateTime
+        userId: String, query: String, newTimestamp: LocalDateTime
     ) {
         searchHistoryDao.updateTimestampForExistingQuery(userId, query, newTimestamp)
     }

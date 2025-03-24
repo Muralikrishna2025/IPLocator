@@ -2,7 +2,6 @@ package uk.ac.tees.mad.iplocator.ui.screens
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,10 +34,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,14 +45,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import org.koin.androidx.compose.koinViewModel
 import uk.ac.tees.mad.iplocator.model.dataclass.AuthResult
+import uk.ac.tees.mad.iplocator.model.dataclass.UserData
 import uk.ac.tees.mad.iplocator.model.dataclass.UserDetails
 import uk.ac.tees.mad.iplocator.navigation.SubGraph
 import uk.ac.tees.mad.iplocator.ui.utils.LoadingScreen
 import uk.ac.tees.mad.iplocator.viewmodel.ProfileScreenViewModel
-import kotlin.apply
 
 val LocalIsDarkMode = staticCompositionLocalOf { mutableStateOf(true) }
 
@@ -66,25 +64,23 @@ fun ProfileScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current
-    val sharedPreferences = remember { context.getSharedPreferences("app_settings", Context.MODE_PRIVATE) }
+    val sharedPreferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
     val isDarkMode = LocalIsDarkMode.current
+    val userData by viewModel.userData.collectAsStateWithLifecycle()
+    val userDetailsResult by viewModel.userDetails.collectAsStateWithLifecycle()
+
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Profile") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
-                modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                scrollBehavior = scrollBehavior
+            CenterAlignedTopAppBar(title = { Text("Profile") }, navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            }, scrollBehavior = scrollBehavior
             )
         }) { innerPadding ->
         LazyColumn(
@@ -93,123 +89,78 @@ fun ProfileScreen(
                 .padding(innerPadding)
         ) {
             item {
-                AppSettings(isDarkMode = isDarkMode, sharedPreferences= sharedPreferences)
+                AppSettingsSection(isDarkMode, sharedPreferences)
             }
             item {
-                PersonalDetails(viewModel = viewModel)
+                PersonalDetailsSection(userDetailsResult, userData)
             }
             item {
-                HorizontalDivider(
-                    modifier = Modifier.padding(8.dp), thickness = 2.dp
-                )
-                LogOutButton(navController, viewModel)
+                HorizontalDivider(modifier = Modifier.padding(8.dp), thickness = 2.dp)
+                LogoutSection(navController, viewModel)
             }
         }
     }
 }
 
 @Composable
-fun AppSettings(isDarkMode: MutableState<Boolean>,
-                sharedPreferences: SharedPreferences) {
+fun AppSettingsSection(isDarkMode: MutableState<Boolean>, sharedPreferences: SharedPreferences) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = "App Settings",
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "App Settings",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp),
-                style = MaterialTheme.typography.titleSmall
-            )
-        }
-        Card(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        SectionHeader(icon = Icons.Default.Settings, title = "App Settings")
+        Card(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Dark Mode Toggle
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(imageVector = Icons.Default.DarkMode, contentDescription = "Dark Mode")
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Dark Mode")
-                        Switch(checked = isDarkMode.value, onCheckedChange = {
-                            isDarkMode.value = it
-                            sharedPreferences.edit().putBoolean("dark_mode", it).apply()
-                        })
-                    }
-                }
+                DarkModeToggle(isDarkMode, sharedPreferences)
             }
         }
-
     }
 }
 
+@Composable
+fun DarkModeToggle(isDarkMode: MutableState<Boolean>, sharedPreferences: SharedPreferences) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = Icons.Default.DarkMode, contentDescription = "Dark Mode")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Dark Mode")
+            Switch(checked = isDarkMode.value, onCheckedChange = {
+                isDarkMode.value = it
+                sharedPreferences.edit().putBoolean("dark_mode", it).apply()
+            })
+        }
+    }
+}
 
 @Composable
-fun PersonalDetails(viewModel: ProfileScreenViewModel) {
-    val userDetailsResult by viewModel.userDetails.collectAsState()
+fun PersonalDetailsSection(userDetailsResult: AuthResult<UserDetails>, userData: UserData) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile Details",
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Profile Details",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp),
-                style = MaterialTheme.typography.titleSmall
-            )
-        }
-        Card(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        SectionHeader(icon = Icons.Default.Person, title = "Profile Details")
+        Card(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 when (userDetailsResult) {
-                    is AuthResult.Loading -> {
-                        LoadingScreen()
-                    }
-
+                    is AuthResult.Loading -> LoadingScreen()
                     is AuthResult.Success -> {
-                        val userDetails =
-                            (userDetailsResult as AuthResult.Success<UserDetails>).data
-                        ProfileContent(userDetails)
+                        userData.userDetails?.let { ProfileContent(it) }
                     }
 
                     is AuthResult.Error -> {
@@ -222,67 +173,51 @@ fun PersonalDetails(viewModel: ProfileScreenViewModel) {
                     }
                 }
             }
-
         }
     }
-
 }
-
 
 @Composable
 fun ProfileContent(userDetails: UserDetails) {
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // User ID
-        DetailColumn(
+        DetailRow(
             icon = Icons.Default.AccountCircle,
             iconDesc = "User ID",
             label = "User ID",
             value = userDetails.userId
         )
-        HorizontalDivider(
-            modifier = Modifier.padding(4.dp), thickness = 2.dp
-        )
-        // Email
-        DetailColumn(
+        HorizontalDivider(modifier = Modifier.padding(4.dp), thickness = 2.dp)
+        DetailRow(
             icon = Icons.Filled.Email,
             iconDesc = "Email",
             label = "Email",
             value = userDetails.email ?: "Not available"
         )
-        HorizontalDivider(
-            modifier = Modifier.padding(4.dp), thickness = 2.dp
-        )
-        // Name
-        DetailColumn(
+        HorizontalDivider(modifier = Modifier.padding(4.dp), thickness = 2.dp)
+        DetailRow(
             icon = Icons.Filled.Person,
             iconDesc = "Name",
             label = "Name",
-            value = if (userDetails.displayName.isNullOrEmpty()) "Not available" else userDetails.displayName
+            value = if (userDetails.phoneNumber.isNullOrEmpty()) "Not available" else userDetails.displayName.toString()
         )
-        HorizontalDivider(
-            modifier = Modifier.padding(4.dp), thickness = 2.dp
-        )
-        // Phone Number
-        DetailColumn(
+        HorizontalDivider(modifier = Modifier.padding(4.dp), thickness = 2.dp)
+        DetailRow(
             icon = Icons.Filled.Phone,
             iconDesc = "Phone Number",
             label = "Phone Number",
-            value = if (userDetails.phoneNumber.isNullOrEmpty()) "Not available" else userDetails.phoneNumber
+            value = if (userDetails.phoneNumber.isNullOrEmpty()) "Not available" else userDetails.phoneNumber.toString()
         )
-
     }
 }
 
 @Composable
-fun LogOutButton(navController: NavHostController, viewModel: ProfileScreenViewModel) {
-    // Logout Button
+fun LogoutSection(navController: NavHostController, viewModel: ProfileScreenViewModel) {
     Button(
         onClick = {
-            viewModel.LogOut()
-            navController.navigate(SubGraph.AuthGraph) // Navigate to login screen
-            {
+            viewModel.logOut()
+            navController.navigate(SubGraph.AuthGraph) {
                 popUpTo(SubGraph.HomeGraph) {
                     inclusive = true
                 }
@@ -295,9 +230,8 @@ fun LogOutButton(navController: NavHostController, viewModel: ProfileScreenViewM
     }
 }
 
-
 @Composable
-fun DetailColumn(icon: ImageVector, iconDesc: String, label: String, value: String) {
+fun DetailRow(icon: ImageVector, iconDesc: String, label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -307,11 +241,29 @@ fun DetailColumn(icon: ImageVector, iconDesc: String, label: String, value: Stri
     ) {
         Icon(imageVector = icon, contentDescription = iconDesc)
         Spacer(modifier = Modifier.width(8.dp))
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(text = "$label:", fontWeight = FontWeight.Bold)
             Text(text = value)
         }
+    }
+}
+
+@Composable
+fun SectionHeader(icon: ImageVector, title: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon, contentDescription = title, tint = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 8.dp),
+            style = MaterialTheme.typography.titleSmall
+        )
     }
 }

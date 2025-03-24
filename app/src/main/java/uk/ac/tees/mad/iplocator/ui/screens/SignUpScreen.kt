@@ -121,8 +121,7 @@ fun SignUpScreen(
                                     .fillMaxWidth()
                                     .focusRequester(focusRequesterEmail),
                                 keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Email,
-                                    imeAction = ImeAction.Next
+                                    keyboardType = KeyboardType.Email, imeAction = ImeAction.Next
                                 ),
                                 keyboardActions = KeyboardActions(onNext = {
                                     focusRequesterPassword.requestFocus()
@@ -139,8 +138,7 @@ fun SignUpScreen(
                                     .focusRequester(focusRequesterPassword),
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                 keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Password,
-                                    imeAction = ImeAction.Done
+                                    keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
                                 ),
                                 keyboardActions = KeyboardActions(onDone = {
                                     focusManager.clearFocus()

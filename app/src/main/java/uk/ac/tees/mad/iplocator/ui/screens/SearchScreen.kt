@@ -22,6 +22,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.CloudDone
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,6 +75,7 @@ fun SearchScreen(
     val ipDetailsUiState by viewModel.ipDetailsUiState.collectAsStateWithLifecycle()
     val inputIp by viewModel.inputIp.collectAsStateWithLifecycle()
     val searchHistory by viewModel.searchHistory.collectAsStateWithLifecycle()
+    val offlineMode by viewModel.offlineMode.collectAsStateWithLifecycle()
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -88,35 +92,63 @@ fun SearchScreen(
                         )
                     }
                 },
+                actions = {
+                    AnimatedVisibility(offlineMode == true) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                Icons.Outlined.CloudOff,
+                                "Offline",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    AnimatedVisibility(offlineMode == false) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(Icons.Outlined.CloudDone, "Online", tint = Color.Green)
+                        }
+                    }
+                },
                 modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                 scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(!isErrorInput && inputIp.isNotBlank()) {
+            AnimatedVisibility(!isErrorInput && inputIp.isNotBlank() && ipDetailsUiState is IpDetailsUiState.Success) {
                 val ipLocation by viewModel.ipLocation.collectAsStateWithLifecycle()
-                ExtendedFloatingActionButton(onClick = {
-                    navController.navigate(
-                        Dest.MapScreen(
-                            ipLocation?.latitude,
-                            ipLocation?.longitude,
-                            ipLocation?.ip
+                if (ipLocation?.latitude != null && ipLocation?.longitude != null) {
+                    ExtendedFloatingActionButton(onClick = {
+                        navController.navigate(
+                            Dest.MapScreen(
+                                ipLocation?.latitude, ipLocation?.longitude, ipLocation?.ip
+                            )
                         )
-                    )
-                }, icon = {
-                    Icon(
-                        imageVector = Icons.Default.Explore,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }, text = { Text("Go to Map Screen") })
+                        
+                    }, icon = {
+                        Icon(
+                            imageVector = Icons.Default.Explore,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }, text = { Text("Go to Map Screen") })
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.Center
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            IpSearchBar(
-                viewModel = viewModel,
+            IpSearchBar(viewModel = viewModel,
                 modifier = Modifier,
                 searchHistory = searchHistory,
                 onSearch = { ip, isError ->
@@ -155,26 +187,36 @@ fun SearchScreen(
                         is IpDetailsUiState.Success -> {
                             val ipLocation =
                                 (ipDetailsUiState as IpDetailsUiState.Success).ipLocationDetails
-                            LazyVerticalStaggeredGrid(
-                                columns = StaggeredGridCells.Adaptive(400.dp),
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine
+                            if (ipLocation.latitude != null && ipLocation.longitude != null) {
+                                LazyVerticalStaggeredGrid(
+                                    columns = StaggeredGridCells.Adaptive(400.dp),
+                                    modifier = Modifier.fillMaxSize()
                                 ) {
-                                    HeaderCard(
-                                        header = "Viewing Results for", ipLocation = ipLocation
-                                    )
-                                }
-                                item { LocationDetail(ipLocation) }
-                                item { Coordinates(ipLocation) }
-                                item { ISPDetail(ipLocation) }
-                                item { AdditionalInfo(ipLocation) }
+                                    item(
+                                        span = StaggeredGridItemSpan.FullLine
+                                    ) {
+                                        HeaderCard(
+                                            header = "Viewing Results for", ipLocation = ipLocation
+                                        )
+                                    }
+                                    item { LocationDetail(ipLocation) }
+                                    item { Coordinates(ipLocation) }
+                                    item { ISPDetail(ipLocation) }
+                                    item { AdditionalInfo(ipLocation) }
 //            item { TimezoneDetail(ipLocation) }
 //            item { CurrencyDetail(ipLocation) }
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine
-                                ) { Spacer(modifier = Modifier.height(80.dp)) }
+                                    item(
+                                        span = StaggeredGridItemSpan.FullLine
+                                    ) { Spacer(modifier = Modifier.height(80.dp)) }
+                                }
+                            } else {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(text = "ipstack API key limit reached")
+                                }
                             }
 
                         }

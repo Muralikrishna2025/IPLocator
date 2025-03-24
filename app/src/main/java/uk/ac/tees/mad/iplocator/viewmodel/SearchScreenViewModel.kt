@@ -12,8 +12,10 @@ import kotlinx.coroutines.launch
 import uk.ac.tees.mad.iplocator.model.dataclass.ErrorState
 import uk.ac.tees.mad.iplocator.model.dataclass.IpDetailsUiState
 import uk.ac.tees.mad.iplocator.model.dataclass.IpLocation
+import uk.ac.tees.mad.iplocator.model.dataclass.IpLocationData
 import uk.ac.tees.mad.iplocator.model.dataclass.SearchHistoryItem
 import uk.ac.tees.mad.iplocator.model.repository.AuthRepository
+import uk.ac.tees.mad.iplocator.model.repository.IpLocationDataRepository
 import uk.ac.tees.mad.iplocator.model.repository.IpstackRepository
 import uk.ac.tees.mad.iplocator.model.repository.NetworkRepository
 import uk.ac.tees.mad.iplocator.model.repository.SearchHistoryRepository
@@ -25,7 +27,8 @@ class SearchScreenViewModel(
     private val networkRepository: NetworkRepository,
     private val ipstackRepository: IpstackRepository,
     private val searchHistoryRepository: SearchHistoryRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val ipLocationDataRepository: IpLocationDataRepository
 ) : ViewModel() {
     private val _ipDetailsUiState = MutableStateFlow<IpDetailsUiState>(IpDetailsUiState.Loading)
     val ipDetailsUiState: StateFlow<IpDetailsUiState> = _ipDetailsUiState.asStateFlow()
@@ -49,6 +52,9 @@ class SearchScreenViewModel(
 
     private val _searchHistory = MutableStateFlow<List<SearchHistoryItem>>(emptyList())
     val searchHistory: StateFlow<List<SearchHistoryItem>> = _searchHistory.asStateFlow()
+
+    private val _offlineMode = MutableStateFlow<Boolean?>(null)
+    val offlineMode: StateFlow<Boolean?> = _offlineMode.asStateFlow()
 
     init {
         loadData()
@@ -98,6 +104,7 @@ class SearchScreenViewModel(
     fun getIpLocationDetails(ip: String) {
         viewModelScope.launch {
             _ipDetailsUiState.value = IpDetailsUiState.Loading
+            _offlineMode.value = null
             ipstackRepository.getIpLocationDetails(ip).onSuccess { fetchedIpLocationDetails ->
                 val userId = getCurrentUserId()
                 if (userId != null) {
@@ -106,8 +113,31 @@ class SearchScreenViewModel(
                         searchHistoryRepository.getSearchHistoryForUser(userId)
                     }
                 }
-                _ipDetailsUiState.value = IpDetailsUiState.Success(fetchedIpLocationDetails)
                 _ipLocation.value = fetchedIpLocationDetails
+                ipLocationDataRepository.upsertIpLocationData(
+                    IpLocationData(
+                        ip = _ipLocation.value?.ip.toString(),
+                        type = _ipLocation.value?.type.toString(),
+                        continentCode = _ipLocation.value?.continentCode.toString(),
+                        continentName = _ipLocation.value?.continentName.toString(),
+                        countryCode = _ipLocation.value?.countryCode.toString(),
+                        countryName = _ipLocation.value?.countryName.toString(),
+                        regionCode = _ipLocation.value?.regionCode.toString(),
+                        regionName = _ipLocation.value?.regionName.toString(),
+                        city = _ipLocation.value?.city.toString(),
+                        zip = _ipLocation.value?.zip.toString(),
+                        latitude = _ipLocation.value?.latitude,
+                        longitude = _ipLocation.value?.longitude,
+                        msa = _ipLocation.value?.msa.toString(),
+                        dma = _ipLocation.value?.dma.toString(),
+                        radius = _ipLocation.value?.radius.toString(),
+                        ipRoutingType = _ipLocation.value?.ipRoutingType.toString(),
+                        connectionType = _ipLocation.value?.connectionType.toString(),
+                        location = _ipLocation.value?.location,
+                    )
+                )
+                _offlineMode.value = false
+                _ipDetailsUiState.value = IpDetailsUiState.Success(fetchedIpLocationDetails)
             }.onFailure { exception ->
                 val errorState = when (exception) {
                     is SocketTimeoutException -> {
@@ -126,8 +156,57 @@ class SearchScreenViewModel(
                         ErrorState.UnknownError
                     }
                 }
-                _ipDetailsUiState.value =
-                    IpDetailsUiState.Error(errorState, exception.message.toString())
+                _offlineMode.value = true
+                if (ipLocationDataRepository.countIpLocationDataByIp(ip) > 0) {
+                    val ipLocationDataFromDB = ipLocationDataRepository.getIpLocationDataByIp(ip)
+                    if (ipLocationDataFromDB != null) {
+                        _ipDetailsUiState.value = IpDetailsUiState.Success(
+                            IpLocation(
+                                ip = ipLocationDataFromDB.ip,
+                                type = ipLocationDataFromDB.type,
+                                continentCode = ipLocationDataFromDB.continentCode,
+                                continentName = ipLocationDataFromDB.continentName,
+                                countryCode = ipLocationDataFromDB.countryCode,
+                                countryName = ipLocationDataFromDB.countryName,
+                                regionCode = ipLocationDataFromDB.regionCode,
+                                regionName = ipLocationDataFromDB.regionName,
+                                city = ipLocationDataFromDB.city,
+                                zip = ipLocationDataFromDB.zip,
+                                latitude = ipLocationDataFromDB.latitude,
+                                longitude = ipLocationDataFromDB.longitude,
+                                msa = ipLocationDataFromDB.msa,
+                                dma = ipLocationDataFromDB.dma,
+                                radius = ipLocationDataFromDB.radius,
+                                ipRoutingType = ipLocationDataFromDB.ipRoutingType,
+                                connectionType = ipLocationDataFromDB.connectionType,
+                                location = ipLocationDataFromDB.location
+                            )
+                        )
+                        _ipLocation.value = IpLocation(
+                            ip = ipLocationDataFromDB.ip,
+                            type = ipLocationDataFromDB.type,
+                            continentCode = ipLocationDataFromDB.continentCode,
+                            continentName = ipLocationDataFromDB.continentName,
+                            countryCode = ipLocationDataFromDB.countryCode,
+                            countryName = ipLocationDataFromDB.countryName,
+                            regionCode = ipLocationDataFromDB.regionCode,
+                            regionName = ipLocationDataFromDB.regionName,
+                            city = ipLocationDataFromDB.city,
+                            zip = ipLocationDataFromDB.zip,
+                            latitude = ipLocationDataFromDB.latitude,
+                            longitude = ipLocationDataFromDB.longitude,
+                            msa = ipLocationDataFromDB.msa,
+                            dma = ipLocationDataFromDB.dma,
+                            radius = ipLocationDataFromDB.radius,
+                            ipRoutingType = ipLocationDataFromDB.ipRoutingType,
+                            connectionType = ipLocationDataFromDB.connectionType,
+                            location = ipLocationDataFromDB.location
+                        )
+                    }
+                } else {
+                    _ipDetailsUiState.value =
+                        IpDetailsUiState.Error(errorState, exception.message.toString())
+                }
             }
         }
     }
@@ -138,17 +217,13 @@ class SearchScreenViewModel(
             // Try to update the timestamp first
             if (searchHistoryRepository.isQueryPresent(userId, query)) {
                 searchHistoryRepository.updateTimestampForExistingQuery(
-                    userId,
-                    query,
-                    currentTimestamp
+                    userId, query, currentTimestamp
                 )
             } else {
 
                 // If no rows were updated (meaning the query didn't exist), insert a new row
                 val searchHistoryItem = SearchHistoryItem(
-                    userId = userId,
-                    searchedQuery = query,
-                    timestamp = currentTimestamp
+                    userId = userId, searchedQuery = query, timestamp = currentTimestamp
                 )
                 searchHistoryRepository.insertSearchHistory(searchHistoryItem)
             }
