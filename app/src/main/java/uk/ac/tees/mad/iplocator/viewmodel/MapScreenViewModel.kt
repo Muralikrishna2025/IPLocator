@@ -100,8 +100,8 @@ class MapScreenViewModel(
                         ErrorState.UnknownError
                     }
                 }
-                _offlineMode.value = true
                 if (ipLocationDataRepository.countIpLocationDataByIp(ip) > 0) {
+                    _offlineMode.value = true
                     val ipLocationDataFromDB = ipLocationDataRepository.getIpLocationDataByIp(ip)
                     if (ipLocationDataFromDB != null) {
                         _ipDetailsUiState.value = IpDetailsUiState.Success(
@@ -148,6 +148,7 @@ class MapScreenViewModel(
                         )
                     }
                 } else {
+                    _offlineMode.value = true
                     _ipDetailsUiState.value =
                         IpDetailsUiState.Error(errorState, exception.message.toString())
                 }
@@ -155,11 +156,12 @@ class MapScreenViewModel(
         }
     }
 
+    @Suppress("DEPRECATION")
     fun reverseGeocodeLocation(context: Context, latitude: Double?, longitude: Double?): String {
         if (_offlineMode.value == true) {
             var address = "Address not available in Offline Mode"
             return address
-        } else {
+        } else if (_offlineMode.value == false) {
             val geocoder = Geocoder(context, Locale.getDefault())
             val coordinate = LatLng(latitude ?: 0.0, longitude ?: 0.0)
             val addresses: MutableList<Address>? =
@@ -169,6 +171,9 @@ class MapScreenViewModel(
             } else {
                 "Address not found"
             }
+        } else {
+            var address = "Address not found"
+            return address
         }
     }
 
